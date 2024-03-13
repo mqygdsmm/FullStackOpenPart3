@@ -43,6 +43,20 @@ app.get('/api/persons/:id',(request,response) => {
     }
 })
 
+app.delete('/api/persons/:id', (request, response) => {
+  const id = Number(request.params.id)
+  const person = persons.find(p => p.id === id)
+  if (person) {
+    persons = persons.filter(p => p.id !== id)
+    response.json(person)
+  }
+  else {
+    response.json({
+      error:"data to delete is already been removed"
+    })
+  }
+})
+
 app.get('/info',(request, response) => {
   console.log(request)
   response.send(`Phonebook has info for ${persons.length} people<br>${new Date().toString()}`)

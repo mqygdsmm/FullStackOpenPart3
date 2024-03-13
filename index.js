@@ -30,6 +30,19 @@ app.get('/api/persons', (request, response) => {
     response.json(persons)
 })
 
+app.get('/api/persons/:id',(request,response) => {
+    const id = Number(request.params.id)
+    const person = persons.find(p => p.id === id)
+    if (person) {
+      response.json(person)
+    }
+    else {
+      response.status(400).json({
+        error:'page not found'
+      })
+    }
+})
+
 app.get('/info',(request, response) => {
   console.log(request)
   response.send(`Phonebook has info for ${persons.length} people<br>${new Date().toString()}`)

@@ -1,11 +1,14 @@
 const express = require('express')
+const cors = require('cors')
 const app = express()
 const morgan = require('morgan')
 morgan.token('postData', (req, res) => {return JSON.stringify(req.body)})
 const customFormat = ':method :url :status :res[content-length] - :response-time ms (:postData)';
 
 app.use(express.json())
-app.use(morgan(customFormat));
+app.use(morgan(customFormat))
+app.use(cors())
+
 let persons = [
     { 
       "id": 1,
@@ -89,5 +92,5 @@ app.get('/info',(request, response) => {
   console.log(request)
   response.send(`Phonebook has info for ${persons.length} people<br>${new Date().toString()}`)
 })
-const port = 3001
-app.listen(port, () => {console.log(`server is running in ${port}`)})
+const PORT = process.env.PORT || 3001
+app.listen(PORT, () => {console.log(`server is running in ${PORT}`)})

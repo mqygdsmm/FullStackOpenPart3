@@ -7,33 +7,10 @@ morgan.token('postData', (req, res) => {return JSON.stringify(req.body)})
 const customFormat = ':method :url :status :res[content-length] - :response-time ms (:postData)';
 const Person = require('./models/person')
 
+app.use(express.static('dist'))
 app.use(express.json())
 app.use(morgan(customFormat))
 app.use(cors())
-app.use(express.static('dist'))
-
-let persons = [
-    { 
-      "id": 1,
-      "name": "Arto Hellas", 
-      "number": "040-123456"
-    },
-    { 
-      "id": 2,
-      "name": "Ada Lovelace", 
-      "number": "39-44-5323523"
-    },
-    { 
-      "id": 3,
-      "name": "Dan Abramov", 
-      "number": "12-43-234345"
-    },
-    { 
-      "id": 4,
-      "name": "Mary Poppendieck", 
-      "number": "39-23-6423122"
-    }
-]
 
 
 app.get('/api/persons', (request, response) => {
@@ -48,14 +25,13 @@ app.get('/api/persons/:id',(request,response) => {
     })
 })
 
-app.delete('/api/persons/:id', (request, response) => {
+app.delete('/api/persons/:id', (request, response, next) => {
   Person.findByIdAndDelete(request.params.id)
   .then(result => {
     response.json(result)
   })
   .catch(error => {
-    console.log(error.message)
-    response.status(400).end()
+    next(error)
   })
 })
 
@@ -81,5 +57,17 @@ app.get('/info',(request, response) => {
   console.log(request)
   response.send(`Phonebook has info for ${persons.length} people<br>${new Date().toString()}`)
 })
+
+const errorHandler = (error, request, response, next) => {
+  if (error.name === 'castError') {
+    response.status(400).send('mlformatted Id')
+  }
+  else {
+    console.log('i am here')
+    next(error)
+  }
+}
+
+app.use(errorHandler)
 const PORT = process.env.PORT || 3002
 app.listen(PORT, () => {console.log(`server is running in ${PORT}`)})

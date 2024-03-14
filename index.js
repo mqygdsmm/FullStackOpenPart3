@@ -1,9 +1,11 @@
+require('dotenv').config()
 const express = require('express')
 const cors = require('cors')
 const app = express()
 const morgan = require('morgan')
 morgan.token('postData', (req, res) => {return JSON.stringify(req.body)})
 const customFormat = ':method :url :status :res[content-length] - :response-time ms (:postData)';
+const Person = require('./models/person')
 
 app.use(express.json())
 app.use(morgan(customFormat))
@@ -35,20 +37,15 @@ let persons = [
 
 
 app.get('/api/persons', (request, response) => {
-    response.json(persons)
+    Person.find({}).then(result => {
+      response.json(result)
+    })
 })
 
 app.get('/api/persons/:id',(request,response) => {
-    const id = Number(request.params.id)
-    const person = persons.find(p => p.id === id)
-    if (person) {
+    Person.findById(request.params.id).then(person => {
       response.json(person)
-    }
-    else {
-      response.status(400).json({
-        error:'page not found'
-      })
-    }
+    })
 })
 
 app.delete('/api/persons/:id', (request, response) => {
@@ -73,25 +70,19 @@ app.post('/api/persons', (request, response) => {
     })
   }
   else {
-    if (persons.find(p => p.name === body.name)) {
-      response.json({
-        error:"name must be unique"
-      })
-    }
-    else {
-      const person = {
-        id: Math.floor(Math.random() * 10000),
+      const person = new Person({
         name: body.name,
         number: body.number
-      }
-      persons = persons.concat(person)
-      response.json(person)
+      })
+      person.save().then(result => {
+        console.log(`added ${body.name} ${body.number} to phonebook`)
+        response.json(result)
+      })
     }
-  }
-})
+  })
 app.get('/info',(request, response) => {
   console.log(request)
   response.send(`Phonebook has info for ${persons.length} people<br>${new Date().toString()}`)
 })
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT || 3002
 app.listen(PORT, () => {console.log(`server is running in ${PORT}`)})

@@ -69,8 +69,10 @@ app.put('/api/persons/:id', (request, response, next) => {
   })
 })
 app.get('/info',(request, response) => {
-  console.log(request)
-  response.send(`Phonebook has info for ${persons.length} people<br>${new Date().toString()}`)
+  Person.countDocuments({})
+  .then(count => {
+  response.send(`Phonebook has info for ${count} people<br>${new Date().toString()}`)
+  })
 })
 
 const errorHandler = (error, request, response, next) => {
